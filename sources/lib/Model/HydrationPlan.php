@@ -193,7 +193,7 @@ class HydrationPlan
     {
         $class = $this->projection->getFlexibleEntityClass();
 
-        return (new $class())
+        return (new $class($this->session))
             ->hydrate($values)
             ;
     }

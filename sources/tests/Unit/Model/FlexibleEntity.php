@@ -9,15 +9,16 @@
  */
 namespace PommProject\ModelManager\Test\Unit\Model;
 
-use Atoum;
 use PommProject\ModelManager\Model\FlexibleEntity as PommFlexibleEntity;
 use PommProject\ModelManager\Model\FlexibleEntity\FlexibleEntityInterface;
+use PommProject\ModelManager\Session;
+use PommProject\ModelManager\Test\Unit\BaseTest;
 
-class FlexibleEntity extends Atoum
+class FlexibleEntity extends BaseTest
 {
     public function testConstructorEmpty()
     {
-        $entity = new PikaEntity();
+        $entity = new PikaEntity($this->buildSession());
         $this
             ->object($entity)
             ->isInstanceOf('\PommProject\ModelManager\Model\FlexibleEntity')
@@ -28,12 +29,13 @@ class FlexibleEntity extends Atoum
 
     public function testConstructorWithParameters()
     {
-        $entity = new ChuEntity(['pika' => 'whatever']);
+        $session = $this->buildSession();
+        $entity = new ChuEntity($session, ['pika' => 'whatever']);
         $this
             ->array($entity->fields())
             ->isIdenticalTo(['chu' => true, 'pika' => 'whatever'])
             ;
-        $entity = new ChuEntity(['pika' => 'whatever', 'chu' => false]);
+        $entity = new ChuEntity($session, ['pika' => 'whatever', 'chu' => false]);
         $this
             ->array($entity->fields())
             ->isIdenticalTo(['chu' => false, 'pika' => 'whatever'])
@@ -42,7 +44,7 @@ class FlexibleEntity extends Atoum
 
     public function testGet()
     {
-        $entity = new PikaEntity(['pika' => 'whatever', 'an_array' => [1, 2]]);
+        $entity = new PikaEntity($this->buildSession(), ['pika' => 'whatever', 'an_array' => [1, 2]]);
         $this
             ->string($entity->get('pika'))
             ->isEqualTo('whatever')
@@ -62,7 +64,7 @@ class FlexibleEntity extends Atoum
 
     public function testHas()
     {
-        $entity = new ChuEntity(['pika' => 'whatever']);
+        $entity = new ChuEntity($this->buildSession(), ['pika' => 'whatever']);
         $this
             ->boolean($entity->has('pika'))
             ->isTrue()
@@ -75,7 +77,7 @@ class FlexibleEntity extends Atoum
 
     public function testSet()
     {
-        $entity = new PikaEntity([]);
+        $entity = new PikaEntity($this->buildSession(), []);
         $this
             ->string($entity->set('chu', 'whatever')->get('chu'))
             ->isEqualTo('whatever')
@@ -90,7 +92,7 @@ class FlexibleEntity extends Atoum
 
     public function testAdd()
     {
-        $entity = new PikaEntity(['pika' => 'whatever', 'an_array' => []]);
+        $entity = new PikaEntity($this->buildSession(), ['pika' => 'whatever', 'an_array' => []]);
         $this
             ->array($entity->add('an_array', 1)->get('an_array'))
             ->isIdenticalTo([1])
@@ -108,7 +110,7 @@ class FlexibleEntity extends Atoum
 
     public function testClear()
     {
-        $entity = new ChuEntity(['pika' => 'whatever']);
+        $entity = new ChuEntity($this->buildSession(), ['pika' => 'whatever']);
         $this
             ->boolean($entity->clear('pika')->has('pika'))
             ->isFalse()
@@ -121,7 +123,7 @@ class FlexibleEntity extends Atoum
 
     public function testUnderscoreCall()
     {
-        $entity = new PikaEntity();
+        $entity = new PikaEntity($this->buildSession());
         $this
             ->exception(function () use ($entity) { $entity->eDqSdgeDsTfd(); })
             ->isInstanceOf('\PommProject\ModelManager\Exception\ModelException')
@@ -134,7 +136,7 @@ class FlexibleEntity extends Atoum
 
     public function testUnderscoreCallGet()
     {
-        $entity = new PikaEntity(['pika' => 'whatever', 'chu' => [1, 2]]);
+        $entity = new PikaEntity($this->buildSession(), ['pika' => 'whatever', 'chu' => [1, 2]]);
         $this
             ->string($entity->getPika())
             ->isEqualTo('WHATEVER')
@@ -148,7 +150,7 @@ class FlexibleEntity extends Atoum
 
     public function testUnderscoreCallSet()
     {
-        $entity = new PikaEntity();
+        $entity = new PikaEntity($this->buildSession());
         $this
             ->string($entity->setChu('a value')->get('chu'))
             ->isEqualTo('a value')
@@ -157,7 +159,7 @@ class FlexibleEntity extends Atoum
 
     public function testUnderscoreCallAdd()
     {
-        $entity = new PikaEntity(['pika' => 'whatever', 'chu' => [1, 2]]);
+        $entity = new PikaEntity($this->buildSession(), ['pika' => 'whatever', 'chu' => [1, 2]]);
         $this
             ->array($entity->addChu(3)->get('chu'))
             ->isIdenticalTo([1, 2, 3])
@@ -166,7 +168,7 @@ class FlexibleEntity extends Atoum
 
     public function testUnderscoreCallHas()
     {
-        $entity = new PikaEntity(['chu' => [1, 2]]);
+        $entity = new PikaEntity($this->buildSession(), ['chu' => [1, 2]]);
         $this
             ->boolean($entity->hasPika())
             ->isFalse()
@@ -177,7 +179,7 @@ class FlexibleEntity extends Atoum
 
     public function testUnderscoreCallClear()
     {
-        $entity = new PikaEntity(['pika' => 'whatever']);
+        $entity = new PikaEntity($this->buildSession(), ['pika' => 'whatever']);
         $this
             ->boolean($entity->clearPika()->hasPika())
             ->isFalse()
@@ -186,7 +188,7 @@ class FlexibleEntity extends Atoum
 
     public function testHydrate()
     {
-        $entity = new ChuEntity(['pika' => 'whatever']);
+        $entity = new ChuEntity($this->buildSession(), ['pika' => 'whatever']);
         $this
             ->array($entity->hydrate(['chu' => null, 'an_array' => [1, 2]])->fields())
             ->isIdenticalTo(['chu' => null, 'pika' => 'whatever', 'an_array' => [1, 2]])
@@ -197,7 +199,7 @@ class FlexibleEntity extends Atoum
 
     public function testConvert()
     {
-        $entity = new PikaEntity();
+        $entity = new PikaEntity($this->buildSession());
         $this
             ->array($entity->convert(['WhAtEveR' => 'WoW', 'PikA' => ''])->fields())
             ->isIdenticalTo(['whatever' => 'WoW', 'pika' => ''])
@@ -206,13 +208,14 @@ class FlexibleEntity extends Atoum
 
     public function testExtract()
     {
-        $entity = new PikaEntity();
+        $session = $this->buildSession();
+        $entity = new PikaEntity($session);
         $this
             ->array($entity->extract())
             ->isEmpty()
             ->array($entity->set('pika', 2)->extract())
             ->isIdenticalTo(['pika' => 2, 'pika_hash' => 'c81e728d9d4c2f636f067f89cc14862c'])
-            ->array($entity->set('an_entity', new ChuEntity())->extract())
+            ->array($entity->set('an_entity', new ChuEntity($session))->extract())
             ->isIdenticalTo(['pika' => 2, 'an_entity' => ['chu' => true], 'pika_hash' => 'c81e728d9d4c2f636f067f89cc14862c'])
             ->array($entity->set('an_array', [1, 'whatever'])->extract())
             ->isIdenticalTo([
@@ -221,7 +224,7 @@ class FlexibleEntity extends Atoum
                 'an_array' => [1, 'whatever'],
                 'pika_hash' => 'c81e728d9d4c2f636f067f89cc14862c',
             ])
-            ->array($entity->set('entity_array', [new ChuEntity(), new ChuEntity(['pika' => 1])])->extract())
+            ->array($entity->set('entity_array', [new ChuEntity($session), new ChuEntity($session, ['pika' => 1])])->extract())
             ->isIdenticalTo([
                 'pika' => 2,
                 'an_entity' => ['chu' => true],
@@ -234,7 +237,7 @@ class FlexibleEntity extends Atoum
 
     public function testUnderscoreSet()
     {
-        $entity = new PikaEntity();
+        $entity = new PikaEntity($this->buildSession());
         $entity->chu = 'WoW';
         $entity->pika = 'WoW';
         $this
@@ -245,7 +248,7 @@ class FlexibleEntity extends Atoum
 
     public function testUnderscoreGet()
     {
-        $entity = new PikaEntity(['pika' => 'WoW', 'chu' => 'WoW']);
+        $entity = new PikaEntity($this->buildSession(), ['pika' => 'WoW', 'chu' => 'WoW']);
         $this
             ->string($entity->pika)
             ->isEqualTo('WOW')
@@ -259,7 +262,7 @@ class FlexibleEntity extends Atoum
 
     public function testStatus()
     {
-        $entity = new PikaEntity();
+        $entity = new PikaEntity($this->buildSession());
         $this
             ->integer($entity->status())
             ->isEqualTo(FlexibleEntityInterface::STATUS_NONE)
@@ -270,7 +273,7 @@ class FlexibleEntity extends Atoum
 
     public function testArrayAccess()
     {
-        $entity = new PikaEntity();
+        $entity = new PikaEntity($this->buildSession());
         $entity['pika'] = 'wow';
         $entity['chu'] = 'WOW';
         $this
@@ -299,7 +302,8 @@ class FlexibleEntity extends Atoum
 
     public function testGetIterator()
     {
-        $entity = new PikaEntity();
+        $session = $this->buildSession();
+        $entity = new PikaEntity($session);
         $this
             ->object($entity->getIterator())
             ->isInstanceOf('\ArrayIterator')
@@ -307,7 +311,7 @@ class FlexibleEntity extends Atoum
             ->isEmpty()
             ->array($entity->setPika('chu')->getIterator()->getArrayCopy())
             ->isIdenticalTo(['pika' => 'chu', 'pika_hash' => 'cbcefaf71b4677cb8bcc006e0aeaa34a'])
-            ->object($entity->set('an_entity', new ChuEntity())->getIterator()->getArrayCopy()['an_entity'])
+            ->object($entity->set('an_entity', new ChuEntity($session))->getIterator()->getArrayCopy()['an_entity'])
             ->isInstanceOf('\PommProject\ModelManager\Model\FlexibleEntity')
             ->array($entity->set('an_array', [1, 2])->getIterator()->getArrayCopy()['an_array'])
             ->isIdenticalTo([1, 2])
@@ -316,7 +320,7 @@ class FlexibleEntity extends Atoum
 
     public function testIsset()
     {
-        $entity = new ChuEntity(['pika' => 'whatever']);
+        $entity = new ChuEntity($this->buildSession(), ['pika' => 'whatever']);
         $this
             ->boolean(isset($entity->pika))
             ->isTrue()
@@ -327,7 +331,7 @@ class FlexibleEntity extends Atoum
 
     public function testUnset()
     {
-        $entity = new ChuEntity(['pika' => 'whatever']);
+        $entity = new ChuEntity($this->buildSession(), ['pika' => 'whatever']);
         $this
             ->boolean(isset($entity->pika))
             ->isTrue()
@@ -341,7 +345,7 @@ class FlexibleEntity extends Atoum
 
     public function testModifiedColumn()
     {
-        $entity = new PikaEntity();
+        $entity = new PikaEntity($this->buildSession());
         $this
             ->array($entity->getModifiedColumns())
             ->isEmpty()
@@ -380,9 +384,9 @@ class PikaEntity extends PommFlexibleEntity
 
 class ChuEntity extends PommFlexibleEntity
 {
-    public function __construct(array $values = [])
+    public function __construct(Session $session, array $values = [])
     {
         $this->set('chu', true);
-        parent::__construct($values);
+        parent::__construct($session, $values);
     }
 }

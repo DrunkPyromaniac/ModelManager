@@ -13,6 +13,7 @@ use PommProject\Foundation\Inflector;
 use PommProject\ModelManager\Exception\ModelException;
 use PommProject\ModelManager\Model\FlexibleEntity\FlexibleContainer;
 use PommProject\ModelManager\Model\FlexibleEntity\FlexibleEntityInterface;
+use PommProject\ModelManager\Session;
 
 /**
  * FlexibleEntity
@@ -29,6 +30,7 @@ abstract class FlexibleEntity extends FlexibleContainer implements \ArrayAccess
 {
     public static $strict = true;
     protected static $has_methods;
+    protected $session;
 
     /**
      * __construct
@@ -36,10 +38,12 @@ abstract class FlexibleEntity extends FlexibleContainer implements \ArrayAccess
      * Instantiate the entity and hydrate it with the given values.
      *
      * @access public
+     * @param  Session $session The POMM session that created this.
      * @param  array $values Optional starting values.
      */
-    public function __construct(array $values = null)
+    public function __construct(Session $session, array $values = null)
     {
+        $this->session = $session;
         if ($values !== null) {
             $this->hydrate($values);
         }

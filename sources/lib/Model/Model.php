@@ -135,7 +135,7 @@ abstract class Model implements ClientInterface
     {
         $class_name = $this->getFlexibleEntityClass();
 
-        return (new $class_name)
+        return (new $class_name($this->session))
             ->hydrate($values)
             ;
     }

@@ -277,8 +277,9 @@ class Model extends BaseTest
 
     public function testInsertOne()
     {
-        $model = $this->getWriteFixtureModel($this->buildSession());
-        $entity = new SimpleFixture(['a_varchar' => 'e', 'undefined_field' => null]);
+        $session = $this->buildSession();
+        $model = $this->getWriteFixtureModel($session);
+        $entity = new SimpleFixture($session, ['a_varchar' => 'e', 'undefined_field' => null]);
         $this
             ->object($model->insertOne($entity))
             ->isIdenticalTo($model)
